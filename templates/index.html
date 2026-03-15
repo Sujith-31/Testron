@@ -1,0 +1,861 @@
+<!-- <!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Testron AI Agent</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-shield">
+          <svg viewBox="0 0 52 62" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M26 2L4 11V30C4 44 14 55.5 26 60C38 55.5 48 44 48 30V11L26 2Z" fill="var(--bg2)"
+              stroke="var(--accent)" stroke-width="1.5" />
+            <path d="M26 10L10 17V30C10 40 17 49 26 52.5C35 49 42 40 42 30V17L26 10Z" fill="none"
+              stroke="rgba(99,102,241,0.3)" stroke-width="1" />
+            <text x="26" y="38" font-family="Playfair Display, serif" font-weight="800" font-size="22"
+              fill="var(--accent)" text-anchor="middle">T</text>
+          </svg>
+        </div>
+        <div class="brand-text"><span class="brand-name">Testron</span><span class="brand-sub">AI Agent</span></div>
+      </div>
+      <nav class="nav">
+        <button class="nb active" onclick="showChat()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>Chat</button>
+        <button class="nb" onclick="triggerUpload()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>Upload Excel</button>
+        <button class="nb" onclick="clearChat()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+          </svg>Clear</button>
+      </nav>
+      <div class="sb-bottom">
+        <button class="theme-btn" onclick="toggleTheme()">
+          <svg class="sun-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+          </svg>
+          <svg class="moon-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+          <span class="theme-lbl">Light Mode</span>
+        </button>
+        <div class="status-row">
+          <div class="sdot" id="sdot"></div><span id="slbl">Checking...</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <span class="mtag">llama3</span><span class="mtag">grog</span>
+      </div>
+
+      <div class="msgs" id="msgs">
+        <div class="welcome" id="welcome">
+          <div class="welcome-shield">
+            <svg viewBox="0 0 52 62" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M26 2L4 11V30C4 44 14 55.5 26 60C38 55.5 48 44 48 30V11L26 2Z" fill="var(--bg2)"
+                stroke="var(--accent)" stroke-width="1.5" />
+              <path d="M26 10L10 17V30C10 40 17 49 26 52.5C35 49 42 40 42 30V17L26 10Z" fill="none"
+                stroke="rgba(99,102,241,0.3)" stroke-width="1" />
+              <text x="26" y="38" font-family="Playfair Display, serif" font-weight="800" font-size="22"
+                fill="var(--accent)" text-anchor="middle">T</text>
+            </svg>
+          </div>
+          <h1>Testron AI Agent</h1>
+          <p>Upload Excel for <strong>batch analysis</strong> or paste a test case. Get verdict, score, and suggestions
+            — no reprinting, just results.</p>
+          <div class="chips">
+            <div class="chip" onclick="pasteAndSend()">Try a test case</div>
+            <div class="chip" onclick="quickSend('What is boundary value analysis?')">What is BVA?</div>
+            <div class="chip" onclick="quickSend('What makes a good test case?')">Good TC criteria</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="excel-bar" id="excelBar">
+        <div class="eb-left"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg><span id="efname">file.xlsx</span><span class="ebadge" id="ecount">0</span></div>
+        <div class="eb-right">
+          <button class="analyze-btn" onclick="batchAnalyze()"><svg width="12" height="12" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>Analyze All</button>
+          <button class="xbtn" onclick="clearExcel()">✕</button>
+        </div>
+      </div>
+
+      <div class="prog-wrap" id="progWrap">
+        <div class="prog-top"><span id="progLbl">Analyzing...</span><span id="progPct"></span></div>
+        <div class="prog-track">
+          <div class="prog-fill" id="progFill"></div>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="onFile(event)" />
+        <div class="ibox">
+          <button class="plus-btn" id="plusBtn" onclick="toggleMenu()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+          <div class="imenu" id="imenu">
+            <button class="mi" onclick="triggerUpload()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>Upload Excel file</button>
+            <button class="mi" onclick="pasteExample()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>Paste sample test case</button>
+          </div>
+          <textarea id="inp" placeholder="Paste a test case or ask a QA question..." rows="1"></textarea>
+          <button class="send-btn" id="sendBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5">
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg></button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let history = [], busy = false, excelTCs = [], menuOpen = false;
+
+    function toggleTheme() { const h = document.documentElement, d = h.getAttribute('data-theme') === 'dark'; h.setAttribute('data-theme', d ? 'light' : 'dark'); document.querySelector('.theme-lbl').textContent = d ? 'Dark Mode' : 'Light Mode'; }
+
+    async function checkHealth() { try { const r = await fetch('/health'), d = await r.json(), dot = document.getElementById('sdot'), l = document.getElementById('slbl'); if (d.status === 'ok') { dot.className = 'sdot on'; l.textContent = 'Online'; } else throw 0; } catch { document.getElementById('sdot').className = 'sdot off'; document.getElementById('slbl').textContent = 'Offline'; } }
+    checkHealth(); setInterval(checkHealth, 20000);
+
+    const inp = document.getElementById('inp');
+    inp.addEventListener('input', function () { this.style.height = 'auto'; this.style.height = Math.min(this.scrollHeight, 160) + 'px'; });
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+    document.getElementById('sendBtn').addEventListener('click', sendMessage);
+
+    function toggleMenu() { menuOpen = !menuOpen; document.getElementById('imenu').classList.toggle('open', menuOpen); }
+    document.addEventListener('click', e => { if (!e.target.closest('.plus-btn') && !e.target.closest('.imenu')) { document.getElementById('imenu').classList.remove('open'); menuOpen = false; } });
+    function triggerUpload() { document.getElementById('imenu').classList.remove('open'); menuOpen = false; document.getElementById('fileInput').click(); }
+    function showChat() { }
+    function pasteExample() {
+      document.getElementById('imenu').classList.remove('open'); menuOpen = false;
+      inp.value = "TC-ID: TC-001\nTitle: Verify login with valid credentials\nPreconditions: User exists. App is running.\nSteps:\n1. Open login page\n2. Enter email: test@mail.com\n3. Enter password: Test@123\n4. Click Login\nTest Data: Email: test@mail.com | Password: Test@123\nExpected: User redirected to Dashboard";
+      inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight, 160) + 'px'; inp.focus();
+    }
+    function pasteAndSend() { pasteExample(); setTimeout(sendMessage, 100); }
+    function quickSend(t) { inp.value = t; sendMessage(); }
+    function clearChat() {
+      history = [];
+      document.getElementById('msgs').innerHTML = `<div class="welcome" id="welcome"><div class="welcome-shield"><svg viewBox="0 0 52 62" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M26 2L4 11V30C4 44 14 55.5 26 60C38 55.5 48 44 48 30V11L26 2Z" fill="var(--bg2)" stroke="var(--accent)" stroke-width="1.5"/><path d="M26 10L10 17V30C10 40 17 49 26 52.5C35 49 42 40 42 30V17L26 10Z" fill="none" stroke="rgba(99,102,241,0.3)" stroke-width="1"/><text x="26" y="38" font-family="Playfair Display, serif" font-weight="800" font-size="22" fill="var(--accent)" text-anchor="middle">T</text></svg></div><h1>Testron AI Agent</h1><p>Upload Excel for batch analysis or paste a test case.</p><div class="chips"><div class="chip" onclick="pasteAndSend()">Try a test case</div><div class="chip" onclick="quickSend('What is BVA?')">What is BVA?</div></div></div>`;
+    }
+
+    async function onFile(event) {
+      const file = event.target.files[0]; if (!file) return;
+      const fd = new FormData(); fd.append('file', file);
+      try {
+        const res = await fetch('/upload-excel', { method: 'POST', body: fd }), data = await res.json();
+        if (data.error) { toast(data.error, 'err'); return; }
+        excelTCs = data.test_cases;
+        document.getElementById('efname').textContent = file.name;
+        document.getElementById('ecount').textContent = data.count + ' test cases';
+        document.getElementById('excelBar').classList.add('show');
+        toast('Loaded ' + data.count + ' test cases — click Analyze All', 'ok');
+      } catch (e) { toast('Failed: ' + e.message, 'err'); }
+      event.target.value = '';
+    }
+
+    function clearExcel() { excelTCs = []; document.getElementById('excelBar').classList.remove('show'); document.getElementById('progWrap').classList.remove('show'); }
+
+    async function batchAnalyze() {
+      if (!excelTCs.length || busy) return;
+      const w = document.getElementById('welcome'); if (w) w.remove();
+      const note = inp.value.trim();
+      if (note) { inp.value = ''; inp.style.height = 'auto'; }
+      busy = true; document.getElementById('sendBtn').disabled = true;
+      const pw = document.getElementById('progWrap'), pf = document.getElementById('progFill'), pl = document.getElementById('progLbl');
+      pw.classList.add('show'); pf.style.width = '0%'; pl.textContent = 'Sending ' + excelTCs.length + ' test cases...';
+      addBubble('user', note ? note + '\n[+ ' + excelTCs.length + ' test cases from Excel]' : 'Analyze ' + excelTCs.length + ' test cases from Excel');
+      addSys('Running batch analysis — one moment...');
+      let fp = 0;
+      const ft = setInterval(() => { fp = Math.min(fp + 3, 85); pf.style.width = fp + '%'; pl.textContent = 'Analyzing ' + excelTCs.length + ' test cases...'; }, 500);
+      try {
+        const res = await fetch('/batch-analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ test_cases: excelTCs, note: note }) });
+        if (!res.ok) throw new Error('Server error ' + res.status);
+        clearInterval(ft); pf.style.width = '90%';
+        const bid = addBot();
+        const reader = res.body.getReader(), dec = new TextDecoder(); let buf = '', full = '';
+        while (true) {
+          const { done, value } = await reader.read(); if (done) break;
+          buf += dec.decode(value, { stream: true }); const lines = buf.split('\n'); buf = lines.pop();
+          for (const l of lines) {
+            if (!l.startsWith('data: ')) continue; const p = l.slice(6).trim(); if (p === '[DONE]') break;
+            try { const c = JSON.parse(p); if (c.error) { updBot(bid, '❌ ' + c.error); break; } if (c.content) { full += c.content; updBot(bid, full); } } catch { }
+          }
+        }
+        history.push({ role: 'user', content: 'Batch: ' + excelTCs.length + ' test cases' });
+        history.push({ role: 'assistant', content: full });
+      } catch (e) { clearInterval(ft); addBubble('bot', '❌ ' + e.message); }
+      pf.style.width = '100%'; pl.textContent = '✓ Complete';
+      setTimeout(() => pw.classList.remove('show'), 2000);
+      busy = false; document.getElementById('sendBtn').disabled = false; inp.focus();
+    }
+
+    async function sendMessage() {
+      const text = inp.value.trim(); if (!text || busy) return;
+      inp.value = ''; inp.style.height = 'auto';
+      const w = document.getElementById('welcome'); if (w) w.remove();
+      addBubble('user', text); history.push({ role: 'user', content: text });
+      const reply = await streamOne(text);
+      history.push({ role: 'assistant', content: reply });
+    }
+
+    async function streamOne(userText) {
+      busy = true; document.getElementById('sendBtn').disabled = true;
+      const msgs = [...history, { role: 'user', content: userText }];
+      const tid = addTyping(); let full = '';
+      try {
+        const res = await fetch('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: msgs }) });
+        if (!res.ok) throw new Error('Server error ' + res.status);
+        removeEl(tid); const bid = addBot();
+        const reader = res.body.getReader(), dec = new TextDecoder(); let buf = '';
+        while (true) {
+          const { done, value } = await reader.read(); if (done) break;
+          buf += dec.decode(value, { stream: true }); const lines = buf.split('\n'); buf = lines.pop();
+          for (const l of lines) {
+            if (!l.startsWith('data: ')) continue; const p = l.slice(6).trim(); if (p === '[DONE]') break;
+            try { const c = JSON.parse(p); if (c.error) { updBot(bid, '❌ ' + c.error); break; } if (c.content) { full += c.content; updBot(bid, full); } } catch { }
+          }
+        }
+      } catch (e) { removeEl(tid); addBubble('bot', '❌ ' + e.message); }
+      busy = false; document.getElementById('sendBtn').disabled = false; inp.focus(); return full;
+    }
+
+    function lsvg() { return '<svg viewBox="0 0 52 62" width="13" height="15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M26 2L4 11V30C4 44 14 55.5 26 60C38 55.5 48 44 48 30V11L26 2Z" fill="#1a1d27" stroke="#6366f1" stroke-width="2"/><text x="26" y="38" font-family="Playfair Display, serif" font-weight="800" font-size="22" fill="#6366f1" text-anchor="middle">T</text></svg>'; }
+
+    function addBubble(role, text) {
+      const m = document.getElementById('msgs'), r = document.createElement('div');
+      r.className = 'row ' + role;
+      r.innerHTML = role === 'user' ? '<div class="bub user">' + esc(text).replace(/\n/g, '<br>') + '</div>' : '<div class="av">' + lsvg() + '</div><div class="bub bot">' + rend(text) + '</div>';
+      m.appendChild(r); sb();
+    }
+    function addBot() {
+      const id = 'b' + Date.now(), m = document.getElementById('msgs'), r = document.createElement('div');
+      r.className = 'row bot'; r.innerHTML = '<div class="av">' + lsvg() + '</div><div class="bub bot" id="' + id + '"></div>';
+      m.appendChild(r); sb(); return id;
+    }
+    function updBot(id, text) { const e = document.getElementById(id); if (e) { e.innerHTML = rend(text); sb(); } }
+    function addTyping() {
+      const id = 't' + Date.now(), m = document.getElementById('msgs'), r = document.createElement('div');
+      r.id = id; r.className = 'row bot'; r.innerHTML = '<div class="av">' + lsvg() + '</div><div class="bub bot"><div class="typing"><span></span><span></span><span></span></div></div>';
+      m.appendChild(r); sb(); return id;
+    }
+    function addSys(text) { const m = document.getElementById('msgs'), d = document.createElement('div'); d.className = 'sys'; d.textContent = text; m.appendChild(d); sb(); }
+    function removeEl(id) { const e = document.getElementById(id); if (e) e.remove(); }
+    function sb() { const m = document.getElementById('msgs'); m.scrollTop = m.scrollHeight; }
+    function esc(t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function toast(msg, type) { const t = document.createElement('div'); t.className = 'toast ' + (type || ''); t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.classList.add('show'), 10); setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3500); }
+
+    function rend(text) {
+      let t = esc(text);
+      t = t.replace(/VERDICT:\s*PASS/g, 'VERDICT: <span class="vd pass">✓ PASS</span>');
+      t = t.replace(/VERDICT:\s*NEEDS FIX/g, 'VERDICT: <span class="vd warn">⚠ NEEDS FIX</span>');
+      t = t.replace(/VERDICT:\s*CRITICAL/g, 'VERDICT: <span class="vd fail">✕ CRITICAL</span>');
+      t = t.replace(/BATCH VERDICT:\s*(.+)/g, 'BATCH VERDICT: <span class="vd-batch">$1</span>');
+      t = t.replace(/OVERALL SCORE:\s*(\d+)\/10/g, (_, n) => 'OVERALL SCORE: <span class="sc ' + (parseInt(n) >= 8 ? 'pass' : parseInt(n) >= 5 ? 'warn' : 'fail') + '">' + n + '/10</span>');
+      t = t.replace(/SCORE:\s*(\d+)\/10/g, (_, n) => 'SCORE: <span class="sc ' + (parseInt(n) >= 8 ? 'pass' : parseInt(n) >= 5 ? 'warn' : 'fail') + '">' + n + '/10</span>');
+      t = t.replace(/^(ISSUES FOUND|MISSING|SUGGESTIONS|ANALYSIS|COMMON ISSUES|WORST CASES|COVERAGE GAPS|TOP 3 FIXES|RECOMMENDATIONS|WORST TEST CASES):/gm, '<div class="slbl">$1</div>');
+      t = t.replace(/^- Line (\d+) - (.+)/gm, '<div class="iss"><span class="ln">L$1</span><span>$2</span></div>');
+      t = t.replace(/^(\d+)\. (.+)/gm, '<div class="ni"><span class="nn">$1.</span><span>$2</span></div>');
+      t = t.replace(/^- (.+)/gm, '<div class="bi">$1</div>');
+      t = t.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
+      t = t.replace(/\n/g, '<br>');
+      return t;
+    }
+  </script>
+</body>
+
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Testron AI Agent</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+
+  <style>
+    /* ── File Attach Badge ─────────────────────────────── */
+    .file-attach-badge {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: var(--accent);
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .file-attach-badge.show {
+      display: flex;
+    }
+
+    .file-attach-badge .fname {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-attach-badge .fremove {
+      cursor: pointer;
+      color: #ef4444;
+      font-size: 14px;
+      line-height: 1;
+      padding: 0 2px;
+    }
+
+    .file-attach-badge .fremove:hover {
+      opacity: 0.7;
+    }
+
+    /* ── Attach button inside ibox ─────────────────────── */
+    .attach-btn {
+      background: none;
+      border: none;
+      color: var(--t2);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s, background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .attach-btn:hover {
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    .attach-btn.has-file {
+      color: var(--accent);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-shield">
+          <svg viewBox="0 0 52 62" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M26 2L4 11V30C4 44 14 55.5 26 60C38 55.5 48 44 48 30V11L26 2Z" fill="var(--bg2)"
+              stroke="var(--accent)" stroke-width="1.5" />
+            <path d="M26 10L10 17V30C10 40 17 49 26 52.5C35 49 42 40 42 30V17L26 10Z" fill="none"
+              stroke="rgba(99,102,241,0.3)" stroke-width="1" />
+            <text x="26" y="38" font-family="Playfair Display, serif" font-weight="800" font-size="22"
+              fill="var(--accent)" text-anchor="middle">T</text>
+          </svg>
+        </div>
+        <div class="brand-text"><span class="brand-name">Testron</span><span class="brand-sub">AI Agent</span></div>
+      </div>
+      <nav class="nav">
+        <button class="nb active" onclick="showChat()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>Chat</button>
+        <button class="nb" onclick="triggerUpload()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>Upload Excel</button>
+        <button class="nb" onclick="clearChat()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+          </svg>Clear</button>
+      </nav>
+      <div class="sb-bottom">
+        <button class="theme-btn" onclick="toggleTheme()">
+          <svg class="sun-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+          </svg>
+          <svg class="moon-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+          <span class="theme-lbl">Light Mode</span>
+        </button>
+        <div class="status-row">
+          <div class="sdot" id="sdot"></div><span id="slbl">Checking...</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <span class="mtag">llama-3.3-70b</span><span class="mtag">groq ⚡</span>
+      </div>
+
+      <div class="msgs" id="msgs">
+        <div class="welcome" id="welcome">
+          <div class="welcome-shield">
+            <svg viewBox="0 0 52 62" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M26 2L4 11V30C4 44 14 55.5 26 60C38 55.5 48 44 48 30V11L26 2Z" fill="var(--bg2)"
+                stroke="var(--accent)" stroke-width="1.5" />
+              <path d="M26 10L10 17V30C10 40 17 49 26 52.5C35 49 42 40 42 30V17L26 10Z" fill="none"
+                stroke="rgba(99,102,241,0.3)" stroke-width="1" />
+              <text x="26" y="38" font-family="Playfair Display, serif" font-weight="800" font-size="22"
+                fill="var(--accent)" text-anchor="middle">T</text>
+            </svg>
+          </div>
+          <h1>Testron AI Agent</h1>
+          <p>Upload Excel for <strong>batch analysis</strong> or paste a test case. Get verdict, score, and suggestions
+            — no reprinting, just results.</p>
+          <div class="chips">
+            <div class="chip" onclick="pasteAndSend()">Try a test case</div>
+            <div class="chip" onclick="quickSend('What is boundary value analysis?')">What is BVA?</div>
+            <div class="chip" onclick="quickSend('What makes a good test case?')">Good TC criteria</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Old Excel Bar (kept for sidebar Upload Excel button) -->
+      <div class="excel-bar" id="excelBar">
+        <div class="eb-left">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          <span id="efname">file.xlsx</span>
+          <span class="ebadge" id="ecount">0</span>
+        </div>
+        <div class="eb-right">
+          <button class="analyze-btn" onclick="batchAnalyze()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>Analyze All
+          </button>
+          <button class="xbtn" onclick="clearExcel()">✕</button>
+        </div>
+      </div>
+
+      <div class="prog-wrap" id="progWrap">
+        <div class="prog-top"><span id="progLbl">Analyzing...</span><span id="progPct"></span></div>
+        <div class="prog-track">
+          <div class="prog-fill" id="progFill"></div>
+        </div>
+      </div>
+
+      <!-- ── Input Area ───────────────────────────────────── -->
+      <div class="input-area">
+
+        <!-- Hidden file inputs -->
+        <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="onFile(event)" />
+        <input type="file" id="chatFileInput" accept=".xlsx,.xls" style="display:none" onchange="onChatFile(event)" />
+
+        <!-- File attach badge (shows when file is attached to chat) -->
+        <div class="file-attach-badge" id="fileBadge">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          <span class="fname" id="badgeName">file.xlsx</span>
+          <span class="fremove" onclick="removeChatFile()" title="Remove file">✕</span>
+        </div>
+
+        <div class="ibox">
+          <!-- + Menu Button -->
+          <button class="plus-btn" id="plusBtn" onclick="toggleMenu()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+
+          <!-- Dropdown Menu -->
+          <div class="imenu" id="imenu">
+            <button class="mi" onclick="triggerUpload()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>Upload Excel (Batch Analyze)
+            </button>
+            <button class="mi" onclick="pasteExample()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>Paste sample test case
+            </button>
+          </div>
+
+          <!-- 📎 Attach file button (inside chat box) -->
+          <button class="attach-btn" id="attachBtn" onclick="triggerChatFile()" title="Attach Excel to this message">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.41 17.41a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+            </svg>
+          </button>
+
+          <!-- Message Textarea -->
+          <textarea id="inp" placeholder="Message Testron or attach an Excel file 📎..." rows="1"></textarea>
+
+          <!-- Send Button -->
+          <button class="send-btn" id="sendBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let history = [], busy = false, excelTCs = [], menuOpen = false;
+    let chatAttachedFile = null; // ← file attached directly to chat message
+
+    // ── Theme ───────────────────────────────────────────────────
+    function toggleTheme() {
+      const h = document.documentElement, d = h.getAttribute('data-theme') === 'dark';
+      h.setAttribute('data-theme', d ? 'light' : 'dark');
+      document.querySelector('.theme-lbl').textContent = d ? 'Dark Mode' : 'Light Mode';
+    }
+
+    // ── Health Check ────────────────────────────────────────────
+    async function checkHealth() {
+      try {
+        const r = await fetch('/health'), d = await r.json();
+        const dot = document.getElementById('sdot'), l = document.getElementById('slbl');
+        if (d.status === 'ok') { dot.className = 'sdot on'; l.textContent = 'Online'; }
+        else throw 0;
+      } catch { document.getElementById('sdot').className = 'sdot off'; document.getElementById('slbl').textContent = 'Offline'; }
+    }
+    checkHealth(); setInterval(checkHealth, 20000);
+
+    // ── Textarea auto-resize + keyboard send ───────────────────
+    const inp = document.getElementById('inp');
+    inp.addEventListener('input', function () { this.style.height = 'auto'; this.style.height = Math.min(this.scrollHeight, 160) + 'px'; });
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+    document.getElementById('sendBtn').addEventListener('click', sendMessage);
+
+    // ── Plus menu ───────────────────────────────────────────────
+    function toggleMenu() { menuOpen = !menuOpen; document.getElementById('imenu').classList.toggle('open', menuOpen); }
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.plus-btn') && !e.target.closest('.imenu')) {
+        document.getElementById('imenu').classList.remove('open'); menuOpen = false;
+      }
+    });
+
+    // ── Old Excel upload (sidebar / batch) ──────────────────────
+    function triggerUpload() {
+      document.getElementById('imenu').classList.remove('open'); menuOpen = false;
+      document.getElementById('fileInput').click();
+    }
+
+    // ── New Chat File Attach (📎 inside chat box) ───────────────
+    function triggerChatFile() {
+      document.getElementById('chatFileInput').click();
+    }
+
+    function onChatFile(event) {
+      const file = event.target.files[0]; if (!file) return;
+      chatAttachedFile = file;
+      document.getElementById('badgeName').textContent = file.name;
+      document.getElementById('fileBadge').classList.add('show');
+      document.getElementById('attachBtn').classList.add('has-file');
+      inp.placeholder = 'Add a message (optional) or just click Send...';
+      inp.focus();
+      event.target.value = '';
+    }
+
+    function removeChatFile() {
+      chatAttachedFile = null;
+      document.getElementById('fileBadge').classList.remove('show');
+      document.getElementById('attachBtn').classList.remove('has-file');
+      document.getElementById('chatFileInput').value = '';
+      inp.placeholder = 'Message Testron or attach an Excel file 📎...';
+    }
+
+    // ── Send Message (handles both file+text and text only) ─────
+    async function sendMessage() {
+      const text = inp.value.trim();
+      if (!text && !chatAttachedFile || busy) return;
+
+      inp.value = ''; inp.style.height = 'auto';
+      const w = document.getElementById('welcome'); if (w) w.remove();
+
+      // If file is attached → use /chat-with-file
+      if (chatAttachedFile) {
+        const file = chatAttachedFile;
+        removeChatFile();
+
+        // Show user bubble
+        const userMsg = text ? `📎 ${file.name}\n${text}` : `📎 ${file.name}`;
+        addBubble('user', userMsg);
+
+        await streamWithFile(file, text);
+        return;
+      }
+
+      // No file → normal chat
+      addBubble('user', text);
+      history.push({ role: 'user', content: text });
+      const reply = await streamOne(text);
+      history.push({ role: 'assistant', content: reply });
+    }
+
+    // ── Stream response with file attached ──────────────────────
+    async function streamWithFile(file, message) {
+      busy = true; document.getElementById('sendBtn').disabled = true;
+      addSys('Reading Excel file and analyzing...');
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('message', message || 'Analyze these test cases');
+
+      const tid = addTyping(); let full = '';
+
+      try {
+        const res = await fetch('/chat-with-file', { method: 'POST', body: formData });
+        if (!res.ok) throw new Error('Server error ' + res.status);
+        removeEl(tid);
+        const bid = addBot();
+        const reader = res.body.getReader(), dec = new TextDecoder(); let buf = '';
+
+        while (true) {
+          const { done, value } = await reader.read(); if (done) break;
+          buf += dec.decode(value, { stream: true });
+          const lines = buf.split('\n'); buf = lines.pop();
+          for (const l of lines) {
+            if (!l.startsWith('data: ')) continue;
+            const p = l.slice(6).trim(); if (p === '[DONE]') break;
+            try {
+              const c = JSON.parse(p);
+              if (c.error) { updBot(bid, '❌ ' + c.error); break; }
+              if (c.content) { full += c.content; updBot(bid, full); }
+            } catch { }
+          }
+        }
+
+        history.push({ role: 'user', content: `[Excel file: ${file.name}] ${message}` });
+        history.push({ role: 'assistant', content: full });
+
+      } catch (e) {
+        removeEl(tid); addBubble('bot', '❌ ' + e.message);
+      }
+
+      busy = false; document.getElementById('sendBtn').disabled = false; inp.focus();
+    }
+
+    // ── Old Batch Analyze (from sidebar upload) ─────────────────
+    function showChat() { }
+
+    function pasteExample() {
+      document.getElementById('imenu').classList.remove('open'); menuOpen = false;
+      inp.value = "TC-ID: TC-001\nTitle: Verify login with valid credentials\nPreconditions: User exists. App is running.\nSteps:\n1. Open login page\n2. Enter email: test@mail.com\n3. Enter password: Test@123\n4. Click Login\nTest Data: Email: test@mail.com | Password: Test@123\nExpected: User redirected to Dashboard";
+      inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight, 160) + 'px'; inp.focus();
+    }
+
+    function pasteAndSend() { pasteExample(); setTimeout(sendMessage, 100); }
+    function quickSend(t) { inp.value = t; sendMessage(); }
+
+    function clearChat() {
+      history = [];
+      document.getElementById('msgs').innerHTML = `<div class="welcome" id="welcome">
+        <div class="welcome-shield"><svg viewBox="0 0 52 62" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M26 2L4 11V30C4 44 14 55.5 26 60C38 55.5 48 44 48 30V11L26 2Z" fill="var(--bg2)" stroke="var(--accent)" stroke-width="1.5"/><path d="M26 10L10 17V30C10 40 17 49 26 52.5C35 49 42 40 42 30V17L26 10Z" fill="none" stroke="rgba(99,102,241,0.3)" stroke-width="1"/><text x="26" y="38" font-family="Playfair Display, serif" font-weight="800" font-size="22" fill="var(--accent)" text-anchor="middle">T</text></svg></div>
+        <h1>Testron AI Agent</h1>
+        <p>Upload Excel for batch analysis or paste a test case.</p>
+        <div class="chips"><div class="chip" onclick="pasteAndSend()">Try a test case</div><div class="chip" onclick="quickSend('What is BVA?')">What is BVA?</div></div>
+      </div>`;
+    }
+
+    async function onFile(event) {
+      const file = event.target.files[0]; if (!file) return;
+      const fd = new FormData(); fd.append('file', file);
+      try {
+        const res = await fetch('/upload-excel', { method: 'POST', body: fd }), data = await res.json();
+        if (data.error) { toast(data.error, 'err'); return; }
+        excelTCs = data.test_cases;
+        document.getElementById('efname').textContent = file.name;
+        document.getElementById('ecount').textContent = data.count + ' test cases';
+        document.getElementById('excelBar').classList.add('show');
+        toast('Loaded ' + data.count + ' test cases — click Analyze All', 'ok');
+      } catch (e) { toast('Failed: ' + e.message, 'err'); }
+      event.target.value = '';
+    }
+
+    function clearExcel() {
+      excelTCs = [];
+      document.getElementById('excelBar').classList.remove('show');
+      document.getElementById('progWrap').classList.remove('show');
+    }
+
+    async function batchAnalyze() {
+      if (!excelTCs.length || busy) return;
+      const w = document.getElementById('welcome'); if (w) w.remove();
+      const note = inp.value.trim();
+      if (note) { inp.value = ''; inp.style.height = 'auto'; }
+      busy = true; document.getElementById('sendBtn').disabled = true;
+      const pw = document.getElementById('progWrap'), pf = document.getElementById('progFill'), pl = document.getElementById('progLbl');
+      pw.classList.add('show'); pf.style.width = '0%'; pl.textContent = 'Sending ' + excelTCs.length + ' test cases...';
+      addBubble('user', note ? note + '\n[+ ' + excelTCs.length + ' test cases from Excel]' : 'Analyze ' + excelTCs.length + ' test cases from Excel');
+      addSys('Running batch analysis — one moment...');
+      let fp = 0;
+      const ft = setInterval(() => { fp = Math.min(fp + 3, 85); pf.style.width = fp + '%'; pl.textContent = 'Analyzing ' + excelTCs.length + ' test cases...'; }, 500);
+      try {
+        const res = await fetch('/batch-analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ test_cases: excelTCs, note: note }) });
+        if (!res.ok) throw new Error('Server error ' + res.status);
+        clearInterval(ft); pf.style.width = '90%';
+        const bid = addBot();
+        const reader = res.body.getReader(), dec = new TextDecoder(); let buf = '', full = '';
+        while (true) {
+          const { done, value } = await reader.read(); if (done) break;
+          buf += dec.decode(value, { stream: true }); const lines = buf.split('\n'); buf = lines.pop();
+          for (const l of lines) {
+            if (!l.startsWith('data: ')) continue; const p = l.slice(6).trim(); if (p === '[DONE]') break;
+            try { const c = JSON.parse(p); if (c.error) { updBot(bid, '❌ ' + c.error); break; } if (c.content) { full += c.content; updBot(bid, full); } } catch { }
+          }
+        }
+        history.push({ role: 'user', content: 'Batch: ' + excelTCs.length + ' test cases' });
+        history.push({ role: 'assistant', content: full });
+      } catch (e) { clearInterval(ft); addBubble('bot', '❌ ' + e.message); }
+      pf.style.width = '100%'; pl.textContent = '✓ Complete';
+      setTimeout(() => pw.classList.remove('show'), 2000);
+      busy = false; document.getElementById('sendBtn').disabled = false; inp.focus();
+    }
+
+    // ── Normal stream (text only) ───────────────────────────────
+    async function streamOne(userText) {
+      busy = true; document.getElementById('sendBtn').disabled = true;
+      const msgs = [...history, { role: 'user', content: userText }];
+      const tid = addTyping(); let full = '';
+      try {
+        const res = await fetch('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: msgs }) });
+        if (!res.ok) throw new Error('Server error ' + res.status);
+        removeEl(tid); const bid = addBot();
+        const reader = res.body.getReader(), dec = new TextDecoder(); let buf = '';
+        while (true) {
+          const { done, value } = await reader.read(); if (done) break;
+          buf += dec.decode(value, { stream: true }); const lines = buf.split('\n'); buf = lines.pop();
+          for (const l of lines) {
+            if (!l.startsWith('data: ')) continue; const p = l.slice(6).trim(); if (p === '[DONE]') break;
+            try { const c = JSON.parse(p); if (c.error) { updBot(bid, '❌ ' + c.error); break; } if (c.content) { full += c.content; updBot(bid, full); } } catch { }
+          }
+        }
+      } catch (e) { removeEl(tid); addBubble('bot', '❌ ' + e.message); }
+      busy = false; document.getElementById('sendBtn').disabled = false; inp.focus(); return full;
+    }
+
+    // ── DOM Helpers ─────────────────────────────────────────────
+    function lsvg() { return '<svg viewBox="0 0 52 62" width="13" height="15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M26 2L4 11V30C4 44 14 55.5 26 60C38 55.5 48 44 48 30V11L26 2Z" fill="#1a1d27" stroke="#6366f1" stroke-width="2"/><text x="26" y="38" font-family="Playfair Display, serif" font-weight="800" font-size="22" fill="#6366f1" text-anchor="middle">T</text></svg>'; }
+
+    function addBubble(role, text) {
+      const m = document.getElementById('msgs'), r = document.createElement('div');
+      r.className = 'row ' + role;
+      r.innerHTML = role === 'user'
+        ? '<div class="bub user">' + esc(text).replace(/\n/g, '<br>') + '</div>'
+        : '<div class="av">' + lsvg() + '</div><div class="bub bot">' + rend(text) + '</div>';
+      m.appendChild(r); sb();
+    }
+
+    function addBot() {
+      const id = 'b' + Date.now(), m = document.getElementById('msgs'), r = document.createElement('div');
+      r.className = 'row bot'; r.innerHTML = '<div class="av">' + lsvg() + '</div><div class="bub bot" id="' + id + '"></div>';
+      m.appendChild(r); sb(); return id;
+    }
+
+    function updBot(id, text) { const e = document.getElementById(id); if (e) { e.innerHTML = rend(text); sb(); } }
+
+    function addTyping() {
+      const id = 't' + Date.now(), m = document.getElementById('msgs'), r = document.createElement('div');
+      r.id = id; r.className = 'row bot';
+      r.innerHTML = '<div class="av">' + lsvg() + '</div><div class="bub bot"><div class="typing"><span></span><span></span><span></span></div></div>';
+      m.appendChild(r); sb(); return id;
+    }
+
+    function addSys(text) {
+      const m = document.getElementById('msgs'), d = document.createElement('div');
+      d.className = 'sys'; d.textContent = text; m.appendChild(d); sb();
+    }
+
+    function removeEl(id) { const e = document.getElementById(id); if (e) e.remove(); }
+    function sb() { const m = document.getElementById('msgs'); m.scrollTop = m.scrollHeight; }
+    function esc(t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+    function toast(msg, type) {
+      const t = document.createElement('div'); t.className = 'toast ' + (type || ''); t.textContent = msg;
+      document.body.appendChild(t); setTimeout(() => t.classList.add('show'), 10);
+      setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3500);
+    }
+
+    function rend(text) {
+      let t = esc(text);
+      t = t.replace(/VERDICT:\s*PASS/g, 'VERDICT: <span class="vd pass">✓ PASS</span>');
+      t = t.replace(/VERDICT:\s*NEEDS FIX/g, 'VERDICT: <span class="vd warn">⚠ NEEDS FIX</span>');
+      t = t.replace(/VERDICT:\s*CRITICAL/g, 'VERDICT: <span class="vd fail">✕ CRITICAL</span>');
+      t = t.replace(/BATCH VERDICT:\s*(.+)/g, 'BATCH VERDICT: <span class="vd-batch">$1</span>');
+      t = t.replace(/OVERALL SCORE:\s*(\d+)\/10/g, (_, n) => 'OVERALL SCORE: <span class="sc ' + (parseInt(n) >= 8 ? 'pass' : parseInt(n) >= 5 ? 'warn' : 'fail') + '">' + n + '/10</span>');
+      t = t.replace(/SCORE:\s*(\d+)\/10/g, (_, n) => 'SCORE: <span class="sc ' + (parseInt(n) >= 8 ? 'pass' : parseInt(n) >= 5 ? 'warn' : 'fail') + '">' + n + '/10</span>');
+      t = t.replace(/^(ISSUES FOUND|MISSING|SUGGESTIONS|ANALYSIS|COMMON ISSUES|WORST CASES|COVERAGE GAPS|TOP 3 FIXES|RECOMMENDATIONS|WORST TEST CASES|DUPLICATE TEST CASES|MISSING TEST CASES|SUGGESTED BVA TESTS|SUGGESTED NEGATIVE TESTS):/gm, '<div class="slbl">$1</div>');
+      t = t.replace(/^- Line (\d+) - (.+)/gm, '<div class="iss"><span class="ln">L$1</span><span>$2</span></div>');
+      t = t.replace(/^(\d+)\. (.+)/gm, '<div class="ni"><span class="nn">$1.</span><span>$2</span></div>');
+      t = t.replace(/^- (.+)/gm, '<div class="bi">$1</div>');
+      t = t.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
+      t = t.replace(/\n/g, '<br>');
+      return t;
+    }
+  </script>
+</body>
+
+</html>
